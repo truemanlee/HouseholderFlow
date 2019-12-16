@@ -52,5 +52,5 @@ class HouseHolderFlow():
         loss1 = tf.reduce_mean((ref - targets) ** 2)
         # KL loss
         # householder flow does not change the stddev but changes the mu, and mu = H_t H_{t-1} ... H1
-        loss2 = 0.5 * (-tf.log(hf_output['sigma']) - dims + hf_output['sigma'] + (hf_output['mu'] - hf_output['zmu']))
+        loss2 = 0.5 * tf.reduce_mean(-tf.log(hf_output['sigma']) + hf_output['sigma'] + (hf_output['mu'] - hf_output['zmu']))
         return loss1 - loss2
