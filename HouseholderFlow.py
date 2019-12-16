@@ -43,6 +43,7 @@ class HouseHolderFlow():
 
     def NN_decoder(self, inputs):
         # decoder, it's just a template and one could design it as him/her/it likes.
+        # the inputs should be z_t, if one needs other conditions, one could add it as him/her/it likes
         outputs = inputs
         return outputs
 
