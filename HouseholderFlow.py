@@ -53,6 +53,7 @@ class HouseHolderFlow():
         loss1 = tf.reduce_mean((ref - targets) ** 2)
         # KL divergence
         # householder flow does not change the sigma but changes the mu, and mu = H_t H_{t-1} ... H1
-        loss2 = 0.5 * tf.reduce_mean(-2*tf.log(hf_output['sigma']) + hf_output['sigma']**2 + (hf_output['mu'] - hf_output['zmu'])**2)
+        loss2 = 0.5 * tf.reduce_sum(-2*tf.log(hf_output['sigma']) + hf_output['sigma']**2 + (hf_output['mu'] - hf_output['zmu'])**2, axis=-1)
+        loss2 = tf.reduce_mean(loss2)
         loss2 = -loss2
         return loss1 + loss2
