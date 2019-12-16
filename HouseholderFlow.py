@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf 
 
-# HouseHolder变换
+# HouseHolder tranformation
 # z' = (I - 2vv^T/||vt||^2) z
 # z' = H z
 class HouseHolderFlow():
@@ -12,22 +12,21 @@ class HouseHolderFlow():
         with tf.variable_scope('hf_transform_{}'.format(layer_index)):
             # z:[B, D] -> [B, D]
             dims = z.shape().as_list()[-1]
-            batch_size = tf.shape(z)[0]
             I = tf.eye(dims) # [D, D]
             v = tf.get_variable('v_{}'.format(i), [dims], tf.float32)
-            v_norm = tf.reduce_sum(v ** 2) # 可能需要防溢出措施
+            v_norm = tf.reduce_sum(v ** 2) # may need clip to prevent the overflow
             v = tf.expand_dims(v, axis=-1) # [D, 1]
             v = tf.matmul(v, v, transpose_b=True) # [D, D]
             H = I - 2 * v / v_norm
             z_t = tf.transpose(tf.matmul(H, z, transpose_b=True), [1, 0])
             mu_t = tf.transpose(tf.matmul(H, mu, transpose_b=True), [1, 0])
-            return z_t, mu_t
+            return z_t, mu_t 
 
     def NN_encoder(self, inputs):
-        # mu and sigma encoder
+        # mu and sigma encoder, it's just a template and one could design it as him/her/it likes.
         mean = inputs
         stddev = tf.nn.softplus(inputs)
-        return mean, stddev
+        return mean, stddev # stddev may need clip to prevent the overflow
 
     def hf_flow(self, inputs):
         output = dict()
@@ -43,6 +42,7 @@ class HouseHolderFlow():
         return output
 
     def NN_decoder(self, inputs):
+        # decoder, it's just a template and one could design it as him/her/it likes.
         outputs = inputs
         return outputs
 
@@ -50,7 +50,8 @@ class HouseHolderFlow():
         # reconstruction error & KL loss
         rec = self.NN_decoder(hf_output['zt'])
         loss1 = tf.reduce_mean((ref - targets) ** 2)
-        # KL loss
-        # householder flow does not change the stddev but changes the mu, and mu = H_t H_{t-1} ... H1
+        # KL divergence
+        # householder flow does not change the sigma but changes the mu, and mu = H_t H_{t-1} ... H1
         loss2 = 0.5 * tf.reduce_mean(-tf.log(hf_output['sigma']) + hf_output['sigma'] + (hf_output['mu'] - hf_output['zmu']))
-        return loss1 - loss2
+        loss2 = -loss2
+        return loss1 + loss2
