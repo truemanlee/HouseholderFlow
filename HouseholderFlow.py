@@ -36,7 +36,7 @@ class HouseHolderFlow():
         output['sigma'] = sigma
         output['z'] = z
         for i in range(self.num_flow):
-            z, mu_t = self.hf_transform(z, i)
+            z, mu_t = self.hf_transform(z, mu, i)
         output['z_t'] = z
         output['mu_t'] = mu_t
         return output
