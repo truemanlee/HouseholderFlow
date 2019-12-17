@@ -50,7 +50,7 @@ class HouseHolderFlow():
     def add_loss(self, hf_output, targets):
         # reconstruction error & KL loss
         rec = self.NN_decoder(hf_output['zt'])
-        loss1 = tf.reduce_mean((ref - targets) ** 2)
+        loss1 = tf.reduce_mean((rec - targets) ** 2)
         # KL divergence
         # householder flow does not change the sigma but changes the mu, and mu = H_t H_{t-1} ... H1
         loss2 = 0.5 * tf.reduce_sum(-2*tf.log(hf_output['sigma']) + hf_output['sigma']**2 + (hf_output['mu'] - hf_output['mu_t'])**2, axis=-1)
